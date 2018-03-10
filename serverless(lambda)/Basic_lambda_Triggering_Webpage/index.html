@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Serverless Page</title>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script>
+//A webpage containing two botton with two lambda fuctions
+function myFunction() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("textField").innerHTML = this.responseText;
+        document.getElementById("imga").src="IMG1 addr from s3 bucket";
+        }
+    };
+    xhttp.open("GET", "API addr for lambda function 1", true);
+    xhttp.send();
+
+}
+
+function myFunctionTwo() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("textField").innerHTML = this.
+        responseText;
+        
+        document.getElementById("imga").src="IMG2 addr from s3 bucket";
+        }
+    };
+    xhttp.open("GET", "API addr for lambda function 2", true);
+    xhttp.send();
+
+}
+
+</script>
+
+<body style="background-color:#DDA0DD;">
+  <div class="container-fluid" align="center"><br><br><br>
+<h1><strong>Welcome to the Serverless Webpage!!</h1>
+<h2 id="textField">Click the buttons for Triggering<br>the lambda functions</span></h2>
+<div style="padding-top:25px">
+<button class="btn btn-primary" onclick="myFunction()" style='margin-right:16px'>API 1</button>
+
+<button class="btn btn-primary" onclick="myFunctionTwo()">API 2</button><br><br></div>
+
+<img class="img-responsive img-circle" id="imga" height="300px" width="300px" src="IMg3 addr from s3 Bucket" alt="coming soon">
+
+</div>
+</body>
+</html>

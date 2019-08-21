@@ -1,0 +1,136 @@
+Creating a Basic Lambda Function to Shut Down an EC2 Instance
+
+Step 1. Creating a CustomRole for lambda to shutdown ec2 instance
+* Attaching a custom_policy in which we allow lambda to log the evnts to the cloudWatch 
+  and to stops the ec2 instance
+
+Step 2. Creating a custom lambda function in which we configured the 
+region and instance id and using boto3 we are stopping the instance
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Stop*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+
+import boto3
+#This simple lambda function is available from AWS with instructions on starting and stopping an instance at regular intervals using Lambda and CloudWatch: https://aws.amazon.com/premiumsupport/knowledge-center/start-stop-lambda-cloudwatch/
+# Enter the region your instances are in. Include only the region without specifying Availability Zone; e.g., 'us-east-1'
+region = 'us-east-1'
+# Enter your instances here: ex. ['X-XXXXXXXX'] you can comma separate the instance IDs for more than one instance: i.e. ['X-XXXXXXXXX', 'X-XXXXXXXXX"]
+instances = ['i-0ebe5dfb796c5389d']
+
+def lambda_handler(event, context):
+    ec2 = boto3.client('ec2', region_name=region)
+    ec2.stop_instances(InstanceIds=instances)
+====================================================================================
+
+Running a Pyspark job on Cloud Dataproc using Google cloud storage
+Dataproc-> managed service for various hadoop and spark workload
+* GCS will be the primary ip/out source for dataproc cluster jobs
+* Advantage of using GCS over HDFS is deleting the cluster when no longer 
+  in use while preserving the data,i.e treating cluster as ephemeral 
+  entity.
+* No data will be present on the dataproc cluster
+Step1: Creating a Dataproc cluster , output a GCS bucket
+and submit a job to the cluster from a seperate location  
+*Enabling the dataproc google api 
+gcloud services enable dataproc.googleapis.com
+*Creating the bucket for output result
+gsutil mb -l us-central1 gs://$DEVSHELL_PROJECT_ID-data
+
+
+*Creatting the dataproc cluster single node cluster 
+it will also create a bucket 
+gcloud dataproc clusters create wordcount --zone=us-central1-f --single-node --master-machine-type=n1-standard-2
+
+*Downloading the wordcount py file for pyspark job and already the data 
+gsutil cp -r gs://la-gcp-labs-resources/data-engineer/dataproc/* .
+
+Step 2: Submitting the pyspark job and reviewing the output in the output 
+bucket and finaly deleteing the dataproc cluster once done
+
+ gcloud dataproc jobs submit pyspark wordcount.py --cluster=wordcount -- \
+    gs://la-gcp-labs-resources/data-engineer/dataproc/romeoandjuliet.txt \
+    gs://$DEVSHELL_PROJECT_ID-data/output/
+
+ gsutil cp -r gs://$DEVSHELL_PROJECT_ID-data/output/* .
+
+#!/usr/bin/env python
+import pyspark
+import sys
+if len(sys.argv) != 3:
+  raise Exception("Exactly 2 arguments are required: <inputUri> <outputUri>")
+inputUri=sys.argv[1]
+outputUri=sys.argv[2]
+
+sc = pyspark.SparkContext()
+lines = sc.textFile(sys.argv[1])
+words = lines.flatMap(lambda line: line.split())
+wordCounts = words.map(lambda word: (word, 1)).reduceByKey(lambda count1, count2: count1 + count2)
+wordCounts.saveAsTextFile(sys.argv[2])
+
+
+=====================================================================================
+
+Serverless application with S3,API Gateway.,State machine, smsLambda function
+emailLambda fuction
+* s3 =>S3 Serving a static website which contains html,css and a javaScript 
+        function for interacting with api gateway 
+* API gateway => API gateway interact with the state machine step function 
+                  through a Lambda fuction, since API gateway cannot connect to the
+                  state machine directly 
+* State machine => The state machine then trigger the smsLambdafuction and        
+                    and the emailLambda function 
+
+Step 1: Creating two lambda fuction, one for email through SES aws service 
+        and other for sms triggering 
+
+Step 2: Configuring the state machine step function.
+        In step function we actually wait for the aount of time and preferences.
+
+
+Step 3: Configuring the apiHandler lambda function, which will trigger the STATE MACHINE
+        Step function.
+
+Step 4: Creating an API gateway to trigger the apiHandler lambda function so
+        that the when we POST the request through API gateway, the parameters should pass
+        throughout the API Gateway to lamdba function and the state machine steps function.
+
+Step 5: Finally checking the created API through the postman or through the 
+        static website created which contains a Javascript function connecting the 
+        API.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

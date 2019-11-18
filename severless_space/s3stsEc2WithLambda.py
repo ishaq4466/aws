@@ -16,11 +16,8 @@ def who_you_are():
 	sts=boto3.client('sts') 
 	sts.get_caller_identity() # it will return a dictionary
 
-import boto3
 
-
-def lambda_handler(event, context):
-
+def stop_instance():
     # Get list of regions
     ec2_client = boto3.client('ec2')
     regions = [region['RegionName']
